@@ -112,13 +112,17 @@ export const LESSON_BY_SLUG_QUERY = defineQuery(`
       title,
       "slug": slug.current,
       coverImage{${IMAGE_FIELDS}},
+      level,
+      studentCount,
       instructor->{${INSTRUCTOR_CARD_FIELDS}},
       category->{${CATEGORY_FIELDS}},
-      "module": modules[references(^.^._id)][0] {
+      modules[]{
         _key,
         title,
         summary,
-        "lessonIndex": count(lessons[]._ref[@ < ^.^.^._id]) + 1
+        lessons[]->{
+          ${LESSON_CARD_FIELDS}
+        }
       }
     }
   }

@@ -59,14 +59,11 @@ export type Lesson = LessonCard & {
     title: string
     slug: string
     coverImage?: SanityImage
+    level?: 'beginner' | 'intermediate' | 'advanced'
+    studentCount?: number
     instructor?: InstructorCard
     category?: CategoryListItem
-    module?: {
-      _key: string
-      title: string
-      summary?: string
-      lessonIndex?: number
-    }
+    modules?: CourseModule[]
   }
 }
 
