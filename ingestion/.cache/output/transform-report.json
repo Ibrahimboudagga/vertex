@@ -1,0 +1,16 @@
+{
+  "attempted": 1,
+  "transformed": 1,
+  "failed": [],
+  "missingCaptions": [],
+  "missingChapters": [],
+  "captionSources": [
+    {
+      "source": "nextjs-app-router-in-depth-file-system-routing",
+      "language": "en",
+      "type": "automatic"
+    }
+  ],
+  "chunks": 17,
+  "chapters": 7
+}
