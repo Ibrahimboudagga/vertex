@@ -10,6 +10,8 @@ export const video = defineType({
     defineField({name: 'sourceId', title: 'Provider video ID', type: 'string', validation: (rule) => rule.required()}),
     defineField({name: 'url', title: 'Video URL', type: 'url', validation: (rule) => rule.required().uri({scheme: ['http', 'https']})}),
     defineField({name: 'sourceTitle', title: 'Source title', type: 'string'}),
+    defineField({name: 'provider', title: 'Provider', type: 'string', options: {list: [{title: 'YouTube', value: 'youtube'}]}, validation: (rule) => rule.required()}),
+    defineField({name: 'captionLanguage', title: 'Caption language', type: 'string', description: 'Language code of the source caption file used for chunks.'}),
     defineField({
       name: 'chapters',
       title: 'Chapters',
@@ -18,7 +20,7 @@ export const video = defineType({
         type: 'object',
         fields: [
           defineField({name: 'startSeconds', type: 'number', validation: (rule) => rule.required().integer().min(0)}),
-          defineField({name: 'label', type: 'string', validation: (rule) => rule.required()}),
+          defineField({name: 'label', type: 'string', validation: (rule) => rule.required().min(1)}),
         ],
         preview: {select: {title: 'label', seconds: 'startSeconds'}, prepare: ({title, seconds}) => ({title, subtitle: `${seconds ?? 0}s`})},
       })],
@@ -31,7 +33,7 @@ export const video = defineType({
         type: 'object',
         fields: [
           defineField({name: 'startSeconds', type: 'number', validation: (rule) => rule.required().integer().min(0)}),
-          defineField({name: 'text', type: 'text', rows: 3, validation: (rule) => rule.required()}),
+          defineField({name: 'text', type: 'text', rows: 3, validation: (rule) => rule.required().min(1)}),
         ],
         preview: {select: {title: 'text', seconds: 'startSeconds'}, prepare: ({title, seconds}) => ({title, subtitle: `${seconds ?? 0}s`})},
       })],

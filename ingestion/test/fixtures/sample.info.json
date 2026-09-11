@@ -1,0 +1,8 @@
+{
+  "title": "Source provided title",
+  "subtitles": {"en": [{}]},
+  "chapters": [
+    {"start_time": 0, "title": "Introduction"},
+    {"start_time": 42.9, "title": "Route handlers"}
+  ]
+}
