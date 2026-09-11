@@ -1,6 +1,7 @@
 import { SignInButton, SignUpButton, Show, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { Icon } from "./components/design-system";
+import { IntelligentSearchForm } from "./components/intelligent-search-form";
 import Link from "next/link";
 import { getAllCourses } from "../sanity/lib/data";
 import { urlFor } from "../sanity/lib/image";
@@ -32,7 +33,7 @@ export default async function Home() {
           <h1 id="hero-title">Search your learning<br />in plain English.</h1>
           <p>Vertex understands what you want to learn and<br className="desktop-only" /> finds the exact lessons across all your courses.</p>
           <Link className="button" href="/courses">Explore Courses <Icon name="chevron" /></Link>
-          <form className="hero-search" action="/search"><Icon name="search" /><input name="q" aria-label="Search anything about your learning" placeholder="Ask anything about your learning..." /><kbd>⌘ K</kbd><button className="sr-only" type="submit">Search</button></form>
+          <IntelligentSearchForm className="hero-search" label="Search anything about your learning" placeholder="Ask anything about your learning..." searchSurface="home" />
         </section>
 
         <section className="courses-section" id="courses" aria-labelledby="courses-title">
