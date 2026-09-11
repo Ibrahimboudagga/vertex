@@ -5,10 +5,12 @@ import Link from 'next/link'
 import {useState} from 'react'
 
 import {Icon} from '../../components/design-system'
+import {captureEvent} from '../../lib/posthog-client'
 import type {CourseModule} from '../../../sanity/lib/types'
 
 type LessonSidebarProps = {
   activeLessonId: string
+  courseId: string
   courseSlug: string
   courseTitle: string
   coverAlt: string
@@ -16,7 +18,7 @@ type LessonSidebarProps = {
   modules: CourseModule[]
 }
 
-export function LessonSidebar({activeLessonId, courseSlug, courseTitle, coverAlt, coverUrl, modules}: LessonSidebarProps) {
+export function LessonSidebar({activeLessonId, courseId, courseSlug, courseTitle, coverAlt, coverUrl, modules}: LessonSidebarProps) {
   const activeModule = modules.find((module) => module.lessons?.some((lesson) => lesson._id === activeLessonId))
   const [openModuleKey, setOpenModuleKey] = useState<string | null>(activeModule?._key ?? modules[0]?._key ?? null)
 
@@ -45,7 +47,16 @@ export function LessonSidebar({activeLessonId, courseSlug, courseTitle, coverAlt
           {isOpen ? <div className="lesson-sidebar-lessons" id={panelId}>
             {lessons.map((lesson, lessonIndex) => {
               const isActive = lesson._id === activeLessonId
-              return <Link aria-current={isActive ? 'page' : undefined} className={`lesson-sidebar-lesson${isActive ? ' is-active' : ''}`} href={`/lessons/${lesson.slug}`} key={lesson._id}>
+              return <Link aria-current={isActive ? 'page' : undefined} className={`lesson-sidebar-lesson${isActive ? ' is-active' : ''}`} href={`/lessons/${lesson.slug}`} key={lesson._id} onClick={() => captureEvent('lesson_selected', {
+                course_id: courseId,
+                course_slug: courseSlug,
+                lesson_id: lesson._id,
+                lesson_slug: lesson.slug,
+                module_key: module._key,
+                module_index: moduleIndex,
+                lesson_index: lessonIndex,
+                source: 'lesson_sidebar',
+              })}>
                 <span className="lesson-sidebar-lesson-dot">{isActive ? <Icon name="play" filled /> : null}</span>
                 <span><strong>{lesson.title}</strong><small>{isActive ? 'Now playing' : formatDuration(lesson.duration)}</small></span>
                 <span className="sr-only">Lesson {moduleIndex + 1}.{lessonIndex + 1}</span>
