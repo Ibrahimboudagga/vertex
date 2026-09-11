@@ -15,6 +15,8 @@ if (process.env.NODE_ENV === "development") {
 if (projectToken && apiHost) {
   posthog.init(projectToken, {
     api_host: apiHost,
+    capture_dead_clicks: false,
+    capture_heatmaps: false,
     defaults: "2026-01-30",
     capture_exceptions: true,
     debug: process.env.NODE_ENV === "development",
