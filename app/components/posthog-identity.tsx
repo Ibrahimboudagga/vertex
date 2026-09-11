@@ -15,13 +15,7 @@ export function PostHogIdentity() {
     const currentUserId = user?.id ?? null
     if (previousUserId.current && previousUserId.current !== currentUserId) resetUser()
 
-    if (user) {
-      identifyUser(user.id, {
-        email: user.primaryEmailAddress?.emailAddress,
-        name: user.fullName,
-        role: typeof user.publicMetadata.role === 'string' ? user.publicMetadata.role : undefined,
-      })
-    }
+    if (user) identifyUser(user.id)
 
     previousUserId.current = currentUserId
   }, [isLoaded, user])

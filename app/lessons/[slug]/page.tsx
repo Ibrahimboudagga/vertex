@@ -8,6 +8,7 @@ import {LessonBookmarkButton} from './lesson-bookmark-button'
 import {LessonContentTabs} from './lesson-content-tabs'
 import {LessonResourceLink} from './lesson-resource-link'
 import {LessonSidebar} from './lesson-sidebar'
+import {LessonVideo} from './lesson-video'
 import {getAllLessonSlugs, getLessonBySlug} from '../../../sanity/lib/data'
 import {urlFor} from '../../../sanity/lib/image'
 import type {CourseModule, LessonCard} from '../../../sanity/lib/types'
@@ -56,7 +57,7 @@ export default async function LessonPage({params, searchParams}: LessonPageProps
       </header>
 
       <div className="lesson-layout">
-        {course ? <LessonSidebar activeLessonId={lesson._id} courseSlug={course.slug} courseTitle={course.title} coverAlt={course.coverImage?.alt ?? `${course.title} course cover`} coverUrl={coverUrl} modules={modules} /> : null}
+        {course ? <LessonSidebar activeLessonId={lesson._id} courseId={course._id} courseSlug={course.slug} courseTitle={course.title} coverAlt={course.coverImage?.alt ?? `${course.title} course cover`} coverUrl={coverUrl} modules={modules} /> : null}
 
         <div className="lesson-main" id="lesson-content">
           <nav className="course-crumbs" aria-label="Breadcrumb">
@@ -67,7 +68,7 @@ export default async function LessonPage({params, searchParams}: LessonPageProps
           </nav>
 
           <section className="lesson-heading" aria-labelledby="lesson-title">
-            <div className="lesson-heading-top"><span>{lessonLabel}</span><LessonBookmarkButton /></div>
+            <div className="lesson-heading-top"><span>{lessonLabel}</span><LessonBookmarkButton lessonId={lesson._id} lessonSlug={lesson.slug} /></div>
             <h1 id="lesson-title">{lesson.title}</h1>
             {overview ? <p className="lesson-summary">{overview}</p> : null}
             <div className="lesson-meta" aria-label="Lesson details">
@@ -77,9 +78,9 @@ export default async function LessonPage({params, searchParams}: LessonPageProps
             </div>
           </section>
 
-          {embedUrl ? <div className="lesson-video"><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen src={embedUrl} title={`${lesson.title} video`} /></div> : <section className="video-unavailable"><Icon name="play" /><h2>Video player unavailable</h2><p>This lesson’s video provider is not supported by the current player.</p></section>}
+          {embedUrl ? <LessonVideo courseId={course?._id} courseSlug={course?.slug} embedUrl={embedUrl} lessonId={lesson._id} lessonSlug={lesson.slug} startSeconds={startSeconds} title={lesson.title} /> : <section className="video-unavailable"><Icon name="play" /><h2>Video player unavailable</h2><p>This lesson’s video provider is not supported by the current player.</p></section>}
 
-          <LessonContentTabs keyPoints={lesson.keyPoints ?? []} notes={lesson.notes} overview={overview} proTip={lesson.proTip} />
+          <LessonContentTabs keyPoints={lesson.keyPoints ?? []} lessonId={lesson._id} lessonSlug={lesson.slug} notes={lesson.notes} overview={overview} proTip={lesson.proTip} />
 
           {lesson.resources?.length ? <section className="lesson-resources" aria-labelledby="lesson-resources-title">
             <h2 id="lesson-resources-title">Resources</h2>
@@ -138,7 +139,7 @@ function getYouTubeEmbedUrl(source: string, startSeconds: number) {
         : null
 
     if (!id || !/^[A-Za-z0-9_-]{11}$/.test(id)) return null
-    const parameters = new URLSearchParams({rel: '0'})
+    const parameters = new URLSearchParams({enablejsapi: '1', rel: '0'})
     if (startSeconds > 0) parameters.set('start', String(startSeconds))
     return `https://www.youtube-nocookie.com/embed/${id}?${parameters}`
   } catch {

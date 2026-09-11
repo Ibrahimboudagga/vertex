@@ -4,8 +4,12 @@ import {PortableText, type PortableTextComponents} from 'next-sanity'
 import {useState} from 'react'
 import type {PortableTextBlock} from 'sanity'
 
+import {captureEvent} from '../../lib/posthog-client'
+
 type LessonContentTabsProps = {
   keyPoints: string[]
+  lessonId: string
+  lessonSlug: string
   notes?: PortableTextBlock[]
   overview?: string
   proTip?: string
@@ -22,13 +26,13 @@ const portableTextComponents: PortableTextComponents = {
   },
 }
 
-export function LessonContentTabs({keyPoints, notes, overview, proTip}: LessonContentTabsProps) {
+export function LessonContentTabs({keyPoints, lessonId, lessonSlug, notes, overview, proTip}: LessonContentTabsProps) {
   const [activeTab, setActiveTab] = useState<'content' | 'notes'>('content')
 
   return <section className="lesson-content-tabs" aria-label="Lesson information">
     <div className="lesson-tab-list" role="tablist" aria-label="Lesson views">
-      <button aria-controls="lesson-content-panel" aria-selected={activeTab === 'content'} id="lesson-content-tab" onClick={() => setActiveTab('content')} role="tab" type="button">Lesson Content</button>
-      <button aria-controls="lesson-notes-panel" aria-selected={activeTab === 'notes'} id="lesson-notes-tab" onClick={() => setActiveTab('notes')} role="tab" type="button">Notes</button>
+      <button aria-controls="lesson-content-panel" aria-selected={activeTab === 'content'} id="lesson-content-tab" onClick={() => selectTab('content', lessonId, lessonSlug, setActiveTab)} role="tab" type="button">Lesson Content</button>
+      <button aria-controls="lesson-notes-panel" aria-selected={activeTab === 'notes'} id="lesson-notes-tab" onClick={() => selectTab('notes', lessonId, lessonSlug, setActiveTab)} role="tab" type="button">Notes</button>
     </div>
 
     {activeTab === 'content' ? <div aria-labelledby="lesson-content-tab" id="lesson-content-panel" role="tabpanel">
@@ -39,4 +43,9 @@ export function LessonContentTabs({keyPoints, notes, overview, proTip}: LessonCo
       {notes?.length ? <PortableText components={portableTextComponents} value={notes} /> : <p>Notes are not available for this lesson.</p>}
     </div>}
   </section>
+}
+
+function selectTab(tab: 'content' | 'notes', lessonId: string, lessonSlug: string, setActiveTab: (tab: 'content' | 'notes') => void) {
+  setActiveTab(tab)
+  captureEvent('lesson_tab_selected', {lesson_id: lessonId, lesson_slug: lessonSlug, tab})
 }

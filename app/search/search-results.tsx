@@ -5,6 +5,8 @@ import Link from 'next/link'
 import {useEffect, useMemo, useRef, useState} from 'react'
 
 import {Icon} from '../components/design-system'
+import {getSafeSearchQueryProperties} from '../lib/analytics'
+import {captureEvent} from '../lib/posthog-client'
 import type {SearchResponse, SearchResult} from '../../sanity/lib/search-types'
 
 type SearchState = {status: 'idle' | 'loading' | 'ready' | 'error'; data?: SearchResponse; message?: string}
@@ -18,6 +20,7 @@ export function SearchExperience({query}: {query: string}) {
     if (!query) return
 
     const controller = new AbortController()
+    captureEvent('search_performed', getSafeSearchQueryProperties(query))
     fetch('/api/search', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({query}), signal: controller.signal})
       .then(async (response) => {
         const payload = await response.json()
@@ -70,13 +73,17 @@ export function SearchExperience({query}: {query: string}) {
       <div className="search-result-toolbar">
         <h2>{response.resultCount} {response.resultCount === 1 ? 'result' : 'results'}</h2>
         <label className="search-result-sort"><span className="sr-only">Sort results</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)} aria-label="Sort results">
+          <select value={sort} onChange={(event) => {
+            const selectedSort = event.target.value as typeof sort
+            setSort(selectedSort)
+            captureEvent('search_sort_changed', {sort: selectedSort})
+          }} aria-label="Sort results">
             <option value="relevance">Most relevant</option>
             <option value="title">Lesson title</option>
           </select>
         </label>
       </div>
-      <div className="search-result-list">{results.map((result) => result.kind === 'video' ? <VideoResultCard key={result.id} result={result} /> : <LessonResultCard key={result.id} result={result} />)}</div>
+      <div className="search-result-list">{results.map((result, resultRank) => result.kind === 'video' ? <VideoResultCard key={result.id} result={result} resultRank={resultRank + 1} /> : <LessonResultCard key={result.id} result={result} resultRank={resultRank + 1} />)}</div>
     </section> : null}
   </>
 }
@@ -110,10 +117,23 @@ function LessonArt({result}: {result: Extract<SearchResult, {kind: 'lesson'}>}) 
   return <div className="search-lesson-art"><Icon name="file" /><ul>{points.slice(0, 3).map((point) => <li key={point}>{point}</li>)}</ul><span>✓</span></div>
 }
 
-function VideoResultCard({result}: {result: Extract<SearchResult, {kind: 'video'}>}) {
-  return <article className="search-result-card search-video-card"><VideoArt result={result} /><div className="search-result-copy"><CourseLockup result={result} /><h2>{result.lessonTitle}</h2><p>{result.description}</p><ResultMeta result={result} /></div><div className="search-result-action"><span className="search-result-kind">Video</span><Link href={`/lessons/${result.lessonSlug}?start=${result.startSeconds}`}><Icon name="play" />Watch from {result.timestampLabel}<Icon name="chevron" /></Link></div></article>
+function VideoResultCard({result, resultRank}: {result: Extract<SearchResult, {kind: 'video'}>; resultRank: number}) {
+  return <article className="search-result-card search-video-card"><VideoArt result={result} /><div className="search-result-copy"><CourseLockup result={result} /><h2>{result.lessonTitle}</h2><p>{result.description}</p><ResultMeta result={result} /></div><div className="search-result-action"><span className="search-result-kind">Video</span><Link href={`/lessons/${result.lessonSlug}?start=${result.startSeconds}`} onClick={() => captureSearchResultOpened(result, resultRank)}><Icon name="play" />Watch from {result.timestampLabel}<Icon name="chevron" /></Link></div></article>
 }
 
-function LessonResultCard({result}: {result: Extract<SearchResult, {kind: 'lesson'}>}) {
-  return <article className="search-result-card search-lesson-card"><LessonArt result={result} /><div className="search-result-copy"><CourseLockup result={result} /><h2>{result.lessonTitle}</h2><p>{result.description}</p><ResultMeta result={result} /></div><div className="search-result-action"><span className="search-result-kind search-result-kind-lesson">Lesson</span><Link href={`/lessons/${result.lessonSlug}`}>View lesson <Icon name="external" /><Icon name="chevron" /></Link></div></article>
+function LessonResultCard({result, resultRank}: {result: Extract<SearchResult, {kind: 'lesson'}>; resultRank: number}) {
+  return <article className="search-result-card search-lesson-card"><LessonArt result={result} /><div className="search-result-copy"><CourseLockup result={result} /><h2>{result.lessonTitle}</h2><p>{result.description}</p><ResultMeta result={result} /></div><div className="search-result-action"><span className="search-result-kind search-result-kind-lesson">Lesson</span><Link href={`/lessons/${result.lessonSlug}`} onClick={() => captureSearchResultOpened(result, resultRank)}>View lesson <Icon name="external" /><Icon name="chevron" /></Link></div></article>
+}
+
+function captureSearchResultOpened(result: SearchResult, resultRank: number) {
+  captureEvent('search_result_opened', {
+    course_id: result.course.id,
+    course_slug: result.course.slug,
+    lesson_slug: result.lessonSlug,
+    lesson_number: result.lessonNumber,
+    module_number: result.moduleNumber,
+    result_rank: resultRank,
+    result_type: result.kind,
+    start_seconds: result.kind === 'video' ? result.startSeconds : undefined,
+  })
 }
