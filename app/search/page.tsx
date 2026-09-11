@@ -2,7 +2,7 @@ import {SignInButton, SignUpButton, Show, UserButton} from '@clerk/nextjs'
 import Link from 'next/link'
 
 import {Icon} from '../components/design-system'
-import {SearchResults} from './search-results'
+import {SearchExperience} from './search-results'
 
 type SearchPageProps = {searchParams: Promise<{q?: string | string[]}>}
 
@@ -16,10 +16,8 @@ export default async function SearchPage({searchParams}: SearchPageProps) {
       <nav className="main-nav" aria-label="Main navigation"><Link className="nav-active" href="/courses">Courses</Link><a href="#learning">My Learning</a></nav>
       <div className="header-actions"><button className="icon-button" type="button" aria-label="Notifications"><Icon name="bell" /></button><Show when="signed-out"><SignInButton mode="modal"><button className="auth-link" type="button">Sign in</button></SignInButton><SignUpButton mode="modal"><button className="auth-button" type="button">Sign up</button></SignUpButton></Show><Show when="signed-in"><div className="user-button-wrap"><UserButton /></div></Show></div>
     </header>
-    <section className="search-content" aria-labelledby="search-title">
-      <p className="eyebrow">Intelligent learning</p><h1 id="search-title">Search your learning</h1>
-      <form className="search-form" action="/search"><Icon name="search" /><input defaultValue={query} name="q" aria-label="Search your learning" placeholder="Ask anything about your learning..." /><button type="submit">Search <Icon name="chevron" /></button></form>
-      <SearchResults key={query} query={query} />
+    <section className="search-results-content" aria-labelledby="search-title">
+      <SearchExperience key={query} query={query} />
     </section>
   </div></main>
 }
