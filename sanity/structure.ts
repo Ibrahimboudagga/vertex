@@ -8,6 +8,8 @@ export const structure: StructureResolver = (S) =>
     .items([
       S.documentTypeListItem('course').title('Courses').icon(BookIcon),
       S.documentTypeListItem('lesson').title('Lessons').icon(PlayIcon),
+      S.documentTypeListItem('video').title('Video index').icon(PlayIcon),
       S.documentTypeListItem('instructor').title('Instructors').icon(UserIcon),
       S.documentTypeListItem('category').title('Categories').icon(TagIcon),
+      S.documentTypeListItem('sanity.agentContext').title('Search context'),
     ])

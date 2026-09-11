@@ -32,7 +32,7 @@ export default async function Home() {
           <h1 id="hero-title">Search your learning<br />in plain English.</h1>
           <p>Vertex understands what you want to learn and<br className="desktop-only" /> finds the exact lessons across all your courses.</p>
           <Link className="button" href="/courses">Explore Courses <Icon name="chevron" /></Link>
-          <label className="hero-search"><Icon name="search" /><input aria-label="Search anything about your learning" placeholder="Ask anything about your learning..." /><kbd>⌘ K</kbd></label>
+          <form className="hero-search" action="/search"><Icon name="search" /><input name="q" aria-label="Search anything about your learning" placeholder="Ask anything about your learning..." /><kbd>⌘ K</kbd><button className="sr-only" type="submit">Search</button></form>
         </section>
 
         <section className="courses-section" id="courses" aria-labelledby="courses-title">

@@ -41,9 +41,9 @@ export const lesson = defineType({
     }),
     defineField({
       name: 'duration',
-      description: 'Human readable duration, for example 14m 32s.',
-      type: 'string',
-      validation: (rule) => rule.required(),
+      description: 'Lesson duration in seconds.',
+      type: 'number',
+      validation: (rule) => rule.required().integer().min(0),
     }),
     defineField({
       name: 'freePreview',
