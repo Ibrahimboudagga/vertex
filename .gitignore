@@ -38,3 +38,6 @@
 /.agents
 /.claude
 /agent
+
+# Offline video ingestion artifacts: raw provider metadata/captions and generated Sanity imports
+/ingestion/.cache/

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:search-seed": "node scripts/generate-search-documents.mjs"
+    "generate:search-seed": "node scripts/generate-search-documents.mjs",
+    "ingest:videos": "node ingestion/cli.mjs",
+    "test:ingestion": "node --test ingestion/test/*.test.mjs"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^2.0.48",
