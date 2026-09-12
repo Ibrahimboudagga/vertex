@@ -5,13 +5,14 @@ import Link from 'next/link'
 import {useEffect, useMemo, useRef, useState} from 'react'
 
 import {Icon} from '../components/design-system'
+import {IntelligentSearchForm} from '../components/intelligent-search-form'
 import {getSafeSearchQueryProperties} from '../lib/analytics'
 import {captureEvent} from '../lib/posthog-client'
 import type {SearchResponse, SearchResult} from '../../sanity/lib/search-types'
 
 type SearchState = {status: 'idle' | 'loading' | 'ready' | 'error'; data?: SearchResponse; message?: string}
 
-export function SearchExperience({query}: {query: string}) {
+export function SearchExperience({query, shouldCaptureSearch}: {query: string; shouldCaptureSearch: boolean}) {
   const [state, setState] = useState<SearchState>(query ? {status: 'loading'} : {status: 'idle'})
   const [sort, setSort] = useState<'relevance' | 'title'>('relevance')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -20,7 +21,7 @@ export function SearchExperience({query}: {query: string}) {
     if (!query) return
 
     const controller = new AbortController()
-    captureEvent('search_performed', getSafeSearchQueryProperties(query))
+    if (shouldCaptureSearch) captureEvent('search_performed', {...getSafeSearchQueryProperties(query), search_surface: 'search_results'})
     fetch('/api/search', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({query}), signal: controller.signal})
       .then(async (response) => {
         const payload = await response.json()
@@ -33,7 +34,7 @@ export function SearchExperience({query}: {query: string}) {
       })
 
     return () => controller.abort()
-  }, [query])
+  }, [query, shouldCaptureSearch])
 
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
@@ -59,10 +60,7 @@ export function SearchExperience({query}: {query: string}) {
       <span className="search-results-label">Search results</span>
       <h1 id="search-title">{query ? <>Results for <em>“{query}”</em></> : 'Search your learning'}</h1>
       {response && results.length > 0 && <p className="search-results-summary">Found {response.resultCount} {response.resultCount === 1 ? 'result' : 'results'} across {response.courseCount} {response.courseCount === 1 ? 'course' : 'courses'}</p>}
-      <form className="search-results-form" action="/search">
-        <Icon name="search" /><input ref={inputRef} defaultValue={query} name="q" aria-label="Search your learning" placeholder="Ask anything about your learning..." />
-        <kbd aria-hidden="true">⌘ K</kbd>
-      </form>
+      <IntelligentSearchForm className="search-results-form" defaultValue={query} inputRef={inputRef} label="Search your learning" placeholder="Ask anything about your learning..." searchSurface="search_results" />
     </div>
 
     {!query || state.status === 'idle' ? <SearchEmpty /> : null}
